@@ -8,11 +8,17 @@ from geo import position_to_xy, us_states
 SENTIMENT_COLORS = ["#313695", "#4575B4", "#74ADD1", "#ABD9E9", "#E0F3F8",
                     "#FFFFFF", "#FEE090", "#FDAE61", "#F46D43", "#D73027",
                     "#A50026"]
+SENTIMENT_COLORS = ["#22366A", "#3B596A", "#427676", "#3F9A82", "#77BFFF", 
+                    "#FFFFFF",
+                    #"#ECDB60", "#F1B82D", "#FFDD22", "#FFAA11", "#FF8800"
+                    "#ECDB60", "#FFDD22", "#FFAA11", "#FF8800", "#FF5500"
+                    ]
 GRAY = "#AAAAAA"
 
 def get_sentiment_color(sentiment, sentiment_scale=4):
     """Returns a color corresponding to the sentiment value.
 
+    Arguments:
     sentiment -- a number between -1 (negative) and +1 (positive)
     """
     if sentiment is None:
@@ -28,6 +34,7 @@ def get_sentiment_color(sentiment, sentiment_scale=4):
 def draw_state(shapes, sentiment_value=None):
     """Draw the named state in the given color on the canvas.
 
+    Arguments:
     state -- a list of list of polygons (which are lists of positions)
     sentiment_value -- a number between -1 (negative) and 1 (positive)
     canvas -- the graphics.Canvas object
@@ -40,6 +47,7 @@ def draw_state(shapes, sentiment_value=None):
 def draw_name(name, location):
     """Draw the two-letter postal code at the center of the state.
 
+    Arguments:
     location -- a position
     """
     center = position_to_xy(location)
@@ -48,6 +56,7 @@ def draw_name(name, location):
 def draw_dot(location, sentiment_value=None, radius=3):
     """Draw a small dot at location.
 
+    Arguments:
     location -- a position
     sentiment_value -- a number between -1 (negative) and 1 (positive)
     """
@@ -59,11 +68,9 @@ def memoize(fn):
     """A decorator for caching the results of the decorated function."""
     cache = {}
     def memoized(*args):
-        if args in cache:
-            return cache[args]
-        result = fn(*args)
-        cache[args] = result
-        return result
+        if args not in cache:
+            cache[args] = fn(*args)
+        return cache[args]
     return memoized
 
 @memoize

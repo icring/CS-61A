@@ -17,9 +17,7 @@ class Canvas(object):
     object.  This id can be passed to move_* and edit_* methods.
 
     Canvas is a singleton; only one Canvas instance can be created.
-
     """
-
     _instance = None
 
     def __init__(self, width=1024, height=768, title='', color='White', tk=None):

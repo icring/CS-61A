@@ -1,6 +1,8 @@
+# Sony Theakanath and Nik Mathur
+# cs61a-ach and cs61a-acg
+
 """Visualizing Twitter Sentiment Across America"""
 
-from database import make_database, add_value, get_keys, get_values, get_value_from_key, get_items, get_len
 from data import word_sentiments, load_tweets
 from datetime import datetime
 from geo import us_states, geo_distance, make_position, longitude, latitude
@@ -8,31 +10,32 @@ from maps import draw_state, draw_name, draw_dot, wait
 from string import ascii_letters
 from ucb import main, trace, interact, log_current_line
 
-
 ###################################
 # Phase 1: The Feelings in Tweets #
 ###################################
 
-# The tweet abstract data type, implemented as a list.
+# tweet data abstraction (A), represented as a list
+# -------------------------------------------------
 
 def make_tweet(text, time, lat, lon):
     """Return a tweet, represented as a Python list.
 
+    Arguments:
     text  -- A string; the text of the tweet, all in lowercase
     time  -- A datetime object; the time that the tweet was posted
     lat   -- A number; the latitude of the tweet's location
     lon   -- A number; the longitude of the tweet's location
 
-    >>> t = make_tweet("just ate lunch", datetime(2012, 9, 24, 13), 38, 74)
+    >>> t = make_tweet('just ate lunch', datetime(2014, 9, 29, 13), 122, 37)
     >>> tweet_text(t)
     'just ate lunch'
     >>> tweet_time(t)
-    datetime.datetime(2012, 9, 24, 13, 0)
+    datetime.datetime(2014, 9, 29, 13, 0)
     >>> p = tweet_location(t)
     >>> latitude(p)
-    38
+    122
     >>> tweet_string(t)
-    '"just ate lunch" @ (38, 74)'
+    '"just ate lunch" @ (122, 37)'
     """
     return [text, time, lat, lon]
 
@@ -51,31 +54,33 @@ def tweet_location(tweet):
     "*** YOUR CODE HERE ***"
     return make_position(tweet[2], tweet[3])
 
-# The tweet abstract data type, implemented as a function.
+# tweet data abstraction (B), represented as a function
+# -----------------------------------------------------
 
 def make_tweet_fn(text, time, lat, lon):
     """An alternate implementation of make_tweet: a tweet is a function.
 
-    >>> t = make_tweet_fn("just ate lunch", datetime(2012, 9, 24, 13), 38, 74)
+    >>> t = make_tweet_fn('just ate lunch', datetime(2014, 9, 29, 13), 122, 37)
     >>> tweet_text_fn(t)
     'just ate lunch'
     >>> tweet_time_fn(t)
-    datetime.datetime(2012, 9, 24, 13, 0)
+    datetime.datetime(2014, 9, 29, 13, 0)
     >>> latitude(tweet_location_fn(t))
-    38
+    122
     """
-    "*** YOUR CODE HERE ***"
     # Please don't call make_tweet in your solution
-    def get(type):
-        if type is 'text':
+    "*** YOUR CODE HERE ***"
+    def f(arg):
+        if arg == 'text':
             return text
-        elif type is 'time':
+        elif arg == 'time':
             return time
-        elif type is 'lat':
+        elif arg == 'lat':
             return lat
-        elif type is 'lon':
+        else:
             return lon
-    return get
+    return f
+        
 
 def tweet_text_fn(tweet):
     """Return a string, the words in the text of a functional tweet."""
@@ -91,15 +96,15 @@ def tweet_location_fn(tweet):
 
 ### === +++ ABSTRACTION BARRIER +++ === ###
 
-def tweet_words(tweet):
-    """Return the words in a tweet."""
-    return extract_words(tweet_text(tweet))
-
 def tweet_string(tweet):
-    """Return a string representing a functional tweet."""
+    """Return a string representing a tweet."""
     location = tweet_location(tweet)
     point = (latitude(location), longitude(location))
     return '"{0}" @ {1}'.format(tweet_text(tweet), point)
+
+def tweet_words(tweet):
+    """Return the words in a tweet."""
+    return extract_words(tweet_text(tweet))
 
 def extract_words(text):
     """Return the words in a tweet, not including punctuation.
@@ -123,8 +128,22 @@ def extract_words(text):
 
 def make_sentiment(value):
     """Return a sentiment, which represents a value that may not exist.
+
+    >>> positive = make_sentiment(0.2)
+    >>> neutral = make_sentiment(0)
+    >>> unknown = make_sentiment(None)
+    >>> has_sentiment(positive)
+    True
+    >>> has_sentiment(neutral)
+    True
+    >>> has_sentiment(unknown)
+    False
+    >>> sentiment_value(positive)
+    0.2
+    >>> sentiment_value(neutral)
+    0
     """
-    assert value is None or (value >= -1 and value <= 1), 'Illegal sentiment value'
+    assert (value is None) or (-1 <= value <= 1), 'Bad sentiment value'
     "*** YOUR CODE HERE ***"
     return value
 
@@ -156,8 +175,8 @@ def get_word_sentiment(word):
     return make_sentiment(word_sentiments.get(word))
 
 def analyze_tweet_sentiment(tweet):
-    """ Return a sentiment representing the degree of positive or negative
-    sentiment in the given tweet, averaging over all the words in the tweet
+    """Return a sentiment representing the degree of positive or negative
+    feeling in the given tweet, averaging over all the words in the tweet
     that have a sentiment value.
 
     If no words in the tweet have a sentiment value, return
@@ -169,170 +188,189 @@ def analyze_tweet_sentiment(tweet):
     >>> negative = make_tweet("saying, 'i hate my job'", None, 0, 0)
     >>> sentiment_value(analyze_tweet_sentiment(negative))
     -0.25
-    >>> no_sentiment = make_tweet("berkeley golden bears!", None, 0, 0)
+    >>> no_sentiment = make_tweet('berkeley golden bears!', None, 0, 0)
     >>> has_sentiment(analyze_tweet_sentiment(no_sentiment))
     False
     """
     "*** YOUR CODE HERE ***"
-    average, total = 0, 0
-    for words in tweet_words(tweet):
-        if has_sentiment(get_word_sentiment(words)) != False:
-            average += sentiment_value(get_word_sentiment(words))
-            total+= 1
-    return make_sentiment(None) if total == 0 else make_sentiment(average/total)
+    words, val, total = extract_words(tweet_text(tweet)), 0, 0
+    for word in words:
+        curr_word = get_word_sentiment(word)
+        if has_sentiment(curr_word) != False:
+            val, total = val + sentiment_value(curr_word), total + 1
+    return make_sentiment(val/total) if total != 0 else make_sentiment(None)
 
 
 #################################
 # Phase 2: The Geometry of Maps #
 #################################
 
+def apply_to_all(map_fn, s):
+    return [map_fn(x) for x in s]
+
+def keep_if(filter_fn, s):
+    return [x for x in s if filter_fn(x)]
+
 def find_centroid(polygon):
-    """Find the centroid of a polygon.
+    """Find the centroid of a polygon. If a polygon has 0 area, use the latitude
+    and longitude of its first position as its centroid.
 
     http://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
 
+    Arguments:
     polygon -- A list of positions, in which the first and last are the same
 
-    Returns: 3 numbers; centroid latitude, centroid longitude, and polygon area
+    Returns 3 numbers: centroid latitude, centroid longitude, and polygon area.
 
-    Hint: If a polygon has 0 area, use the latitude and longitude of its first
-    position as its centroid.
-
-    >>> p1, p2, p3 = make_position(1, 2), make_position(3, 4), make_position(5, 0)
-    >>> triangle = [p1, p2, p3, p1]  # First vertex is also the last vertex
-    >>> round5 = lambda x: round(x, 5) # Rounds floats to 5 digits
-    >>> list(map(round5, find_centroid(triangle)))
+    >>> p1 = make_position(1, 2)
+    >>> p2 = make_position(3, 4)
+    >>> p3 = make_position(5, 0)
+    >>> triangle = [p1, p2, p3, p1] # First vertex is also the last vertex
+    >>> round_all = lambda s: [round(x, 5) for x in s]
+    >>> round_all(find_centroid(triangle))
     [3.0, 2.0, 6.0]
-    >>> list(map(round5, find_centroid([p1, p3, p2, p1])))
+    >>> round_all(find_centroid([p1, p3, p2, p1])) # reversed
     [3.0, 2.0, 6.0]
-    >>> list(map(float, find_centroid([p1, p2, p1])))  # A zero-area polygon
+    >>> apply_to_all(float, find_centroid([p1, p2, p1])) # A zero-area polygon
     [1.0, 2.0, 0.0]
     """
     "*** YOUR CODE HERE ***"
     cx, cy, area, index = 0, 0, 0, 0
     while index < len(polygon)-1:
-        end = (latitude(polygon[index])*longitude(polygon[index+1]) - latitude(polygon[index+1])*longitude(polygon[index]))
-        cx, cy, area, index = cx+(latitude(polygon[index]) + latitude(polygon[index+1]))*end, cy+(longitude(polygon[index]) + longitude(polygon[index+1]))*end, area+end, index+1
+        x, y, xplus, yplus = latitude(polygon[index]), longitude(polygon[index]), latitude(polygon[index+1]), longitude(polygon[index+1])
+        temparea = x*yplus - xplus*y
+        cx, cy, area, index = cx+(x + xplus)*temparea, cy+(y + yplus)*temparea, area+temparea, index+1
     area = area*0.5
-    if area == 0:
-        return [latitude(polygon[0]), longitude(polygon[0]), 0]
-    else:
-        cx, cy = (1/(6*area))*cx, (1/(6*area))*cy
-        return [cx, cy, abs(area)]
+    return [latitude(polygon[0]), longitude(polygon[0]), 0] if area == 0 else [(1/(6*area))*cx, (1/(6*area))*cy, abs(area)]
 
-    
 def find_state_center(polygons):
     """Compute the geographic center of a state, averaged over its polygons.
 
-    The center is the average position of centroids of the polygons in polygons,
-    weighted by the area of those polygons.
+    The center is the average position of centroids of the polygons in
+    polygons, weighted by the area of those polygons.
 
     Arguments:
     polygons -- a list of polygons
 
-    >>> ca = find_state_center(get_value_from_key(us_states,'CA'))  # California
+    >>> ca = find_state_center(us_states['CA'])  # California
     >>> round(latitude(ca), 5)
     37.25389
     >>> round(longitude(ca), 5)
     -119.61439
 
-    >>> hi = find_state_center(get_value_from_key(us_states, 'HI'))  # Hawaii
+    >>> hi = find_state_center(us_states['HI'])  # Hawaii
     >>> round(latitude(hi), 5)
     20.1489
     >>> round(longitude(hi), 5)
     -156.21763
     """
     "*** YOUR CODE HERE ***"
-    cx, cy, area, index = 0, 0, 0, 0
+    index, cx, cy, area = 0, 0, 0, 0 
     while index < len(polygons):
-        arr = find_centroid(polygons[index])
-        cx, cy, area, index = arr[0]*arr[2]+cx, arr[1]*arr[2]+cy, area+arr[2], index+1
-    cx, cy = cx/area, cy/area
-    return make_position(cx, cy)
+        centroid = find_centroid(polygons[index])
+        cx, cy, area, index = cx + centroid[0]*centroid[2], cy + centroid[1]*centroid[2], area + centroid[2], index + 1
+    return make_position(cx/area, cy/area)
 
 
 ###################################
 # Phase 3: The Mood of the Nation #
 ###################################
 
-def get_nearest_state(tweet):
-    """ Try 1
-    nearest, index = get_items(us_states)[0], 0
-    while index < get_len(us_states):
-        loc_state = find_state_center(get_items(us_states)[index][1])
-        if(geo_distance(tweet_location(tweet), loc_state) < geo_distance(tweet_location(tweet), find_state_center(nearest[1]))):
-            nearest = get_items(us_states)[index]
-        index+= 1
-    return nearest
-    """
-    state_centers, index  = [], 0
-    while index < get_len(us_states):
-        state_centers.append([get_items(us_states)[index][0],geo_distance(tweet_location(tweet), find_state_center(get_items(us_states)[index][1]))])
-        index += 1
-    state_centers = sorted(state_centers, key=lambda indiv: indiv[1])
-    return state_centers[0]
+def group_by_key(pairs):
+    """Return a dictionary that relates each unique key in [key, value] pairs
+    to a list of all values that appear paired with that key.
 
-    
-                                                
+    Arguments:
+    pairs -- a sequence of pairs
+
+    >>> example = [ [1, 2], [3, 2], [2, 4], [1, 3], [3, 1], [1, 2] ]
+    >>> group_by_key(example)
+    {1: [2, 3, 2], 2: [4], 3: [2, 1]}
+    """
+    # Optional: This implementation is slow because it traverses the list of
+    #           pairs one time for each key. Can you improve it?
+    keys = [key for key, _ in pairs]
+    return {key: [y for x, y in pairs if x == key] for key in keys}
+
+def tweet_closest_state(tweet):
+    """Returns a state element. Finds it by creating list of states with distance
+    from tweet. Sorts it by the distance element and then picks out first
+    element (first element is smallest distance).
+
+    Arguments:
+    tweet -- a tweet abstract data type
+    """
+    state_distances, index = [], 0
+    while index < len(us_states):
+        current_state = list(us_state.keys())[index]
+        current_state_centroid = list(us_states.values())[index]
+        state_distances.append([current_state, geo_distance(tweet_location(tweet), find_state_center(curren_state_centroid))])
+        index += 1
+    state_distances = sorted(state_distances, key = lambda distances: distances[1])
+    return state_distances[0]
 
 def group_tweets_by_state(tweets):
-    """Return a database that aggregates tweets by their nearest state center.
+    """Return a dictionary that groups tweets by their nearest state center.
 
-    The keys of the returned database are state names, and the values are
+    The keys of the returned dictionary are state names and the values are
     lists of tweets that appear closer to that state center than any other.
 
+    Arguments:
     tweets -- a sequence of tweet abstract data types
 
     >>> sf = make_tweet("welcome to san francisco", None, 38, -122)
     >>> ny = make_tweet("welcome to new york", None, 41, -74)
     >>> two_tweets_by_state = group_tweets_by_state([sf, ny])
-    >>> get_len(two_tweets_by_state)
+    >>> len(two_tweets_by_state)
     2
-    >>> california_tweets = get_value_from_key(two_tweets_by_state, 'CA')
+    >>> california_tweets = two_tweets_by_state['CA']
     >>> len(california_tweets)
     1
     >>> tweet_string(california_tweets[0])
     '"welcome to san francisco" @ (38, -122)'
     """
     "*** YOUR CODE HERE ***"
-    tweets_by_state = make_database()
+    alltweets = []
     for tweet in tweets:
-        state = get_nearest_state(tweet)[0]
-        if state in get_keys(tweets_by_state):
-            tweets_by_state = add_value(tweets_by_state, state, [tweet] + get_value_from_key(tweets_by_state, state))
-        else:
-            tweets_by_state = add_value(tweets_by_state, state, [tweet])
-    return tweets_by_state
+        state_name = tweet_closest_state(tweet)[0]
+        alltweets.append([state_name, tweet])
+    return group_by_key(alltweets)
 
 def analyze_multiple_tweets(tweets):
+    """Analyzes multiple tweets and returns a sentiment value.
+
+    Arguments:
+    tweets -- list of tweet abstract data types
+    """
     average, total = 0, 0
     for tweet in tweets:
         if has_sentiment(analyze_tweet_sentiment(tweet)) == True:
             average += sentiment_value(analyze_tweet_sentiment(tweet))
             total += 1
-    return None if total == 0 else average/total
+    return None if total == 0 else average/total    
 
 def average_sentiments(tweets_by_state):
     """Calculate the average sentiment of the states by averaging over all
-    the tweets from each state. Return the result as a database from state
+    the tweets from each state. Return the result as a dictionary from state
     names to average sentiment values (numbers).
 
     If a state has no tweets with sentiment values, leave it out of the
-    database entirely.  Do NOT include states with no tweets, or with tweets
+    dictionary entirely. Do NOT include states with no tweets, or with tweets
     that have no sentiment, as 0. 0 represents neutral sentiment, not unknown
     sentiment.
 
-    tweets_by_state -- A database from state names to lists of tweets
+    Arguments:
+    tweets_by_state -- A dictionary from state names to lists of tweets
     """
     "*** YOUR CODE HERE ***"
-    averaged_state_sentiments, index, items = make_database(), 0, get_items(tweets_by_state)
-    while index < len(items):
-        total = analyze_multiple_tweets(items[index][1])
-        if total is not None:
-            averaged_state_sentiments = add_value(averaged_state_sentiments, items[index][0], total)
-        index += 1
-    return averaged_state_sentiments
+    averaged_state_sentiments, index = [], 0
+    while index < len(tweets_by_state):
 
+        total = analyze_multiple_tweets(list(tweets_by_state.values())[index])
+        if total is not None:
+            averaged_state_sentiments.append([list(tweets_by_state.keys())[index], total])
+        index += 1
+    return dict(x for x in averaged_state_sentiments)
 
 ##########################
 # Command Line Interface #
@@ -349,14 +387,12 @@ def print_sentiment(text='Are you virtuous or verminous?'):
 
 def draw_centered_map(center_state='TX', n=10):
     """Draw the n states closest to center_state."""
-    us_centers = make_database()
-    for state, s in get_items(us_states):
-        us_centers = add_value(us_centers, state, find_state_center(s))
-    center = get_value_from_key(us_centers, center_state.upper()) 
-    dist_from_center = lambda name: geo_distance(center, get_value_from_key(us_centers, name))
-    for name in sorted(get_keys(us_centers), key=dist_from_center)[:int(n)]:
-        draw_state(get_value_from_key(us_states, name))
-        draw_name(name, get_value_from_key(us_centers, name))
+    centers = {name: find_state_center(us_states[name]) for name in us_states}
+    center = centers[center_state.upper()]
+    distance = lambda name: geo_distance(center, centers[name])
+    for name in sorted(centers, key=distance)[:int(n)]:
+        draw_state(us_states[name])
+        draw_name(name, centers[name])
     draw_dot(center, 1, 10)  # Mark the center state with a red dot
     wait()
 
@@ -365,20 +401,17 @@ def draw_state_sentiments(state_sentiments):
 
     Unknown state names are ignored; states without values are colored grey.
 
-    state_sentiments -- A database from state strings to sentiment values
+    Arguments:
+    state_sentiments -- A dictionary from state strings to sentiment values
     """
-    for name, shapes in get_items(us_states):
-        if name in get_keys(state_sentiments):
-            sentiment = get_value_from_key(state_sentiments, name)
-        else:
-            sentiment = None
-        draw_state(shapes, sentiment)
-    for name, shapes in get_items(us_states):
+    for name, shapes in us_states.items():
+        draw_state(shapes, state_sentiments.get(name))
+    for name, shapes in us_states.items():
         center = find_state_center(shapes)
         if center is not None:
             draw_name(name, center)
 
-def draw_map_for_query(term='my job', file_name='tweets2011.txt'):
+def draw_map_for_query(term='my job', file_name='tweets2014.txt'):
     """Draw the sentiment map corresponding to the tweets that contain term.
 
     Some term suggestions:
@@ -411,7 +444,7 @@ def run(*args):
     parser.add_argument('--print_sentiment', '-p', action='store_true')
     parser.add_argument('--draw_centered_map', '-d', action='store_true')
     parser.add_argument('--draw_map_for_query', '-m', type=str)
-    parser.add_argument('--tweets_file', '-t', type=str, default='tweets2011.txt')
+    parser.add_argument('--tweets_file', '-t', type=str, default='tweets2014.txt')
     parser.add_argument('--use_functional_tweets', '-f', action='store_true')
     parser.add_argument('text', metavar='T', type=str, nargs='*',
                         help='Text to process')
@@ -421,8 +454,8 @@ def run(*args):
         print("Now using a functional representation of tweets!")
         args.use_functional_tweets = False
     if args.draw_map_for_query:
+        print("Using", args.tweets_file)
         draw_map_for_query(args.draw_map_for_query, args.tweets_file)
-        print(args.tweets_file)
         return
     for name, execute in args.__dict__.items():
         if name != 'text' and name != 'tweets_file' and execute:
