@@ -70,7 +70,7 @@ def make_tweet_fn(text, time, lat, lon):
     """
     # Please don't call make_tweet in your solution
     "*** YOUR CODE HERE ***"
-    def f(arg):
+    def selector(arg):
         if arg == 'text':
             return text
         elif arg == 'time':
@@ -79,7 +79,7 @@ def make_tweet_fn(text, time, lat, lon):
             return lat
         else:
             return lon
-    return f
+    return selector
         
 
 def tweet_text_fn(tweet):
@@ -193,13 +193,12 @@ def analyze_tweet_sentiment(tweet):
     False
     """
     "*** YOUR CODE HERE ***"
-    words, val, total = extract_words(tweet_text(tweet)), 0, 0
+    words, word_value, total_tweets = extract_words(tweet_text(tweet)), 0, 0
     for word in words:
         curr_word = get_word_sentiment(word)
         if has_sentiment(curr_word) != False:
-            val, total = val + sentiment_value(curr_word), total + 1
-    return make_sentiment(val/total) if total != 0 else make_sentiment(None)
-
+            word_value, total_tweets = word_value + sentiment_value(curr_word), total_tweets + 1
+    return make_sentiment(word_value/total_tweets) if total_tweets != 0 else make_sentiment(None)
 
 #################################
 # Phase 2: The Geometry of Maps #
@@ -236,11 +235,11 @@ def find_centroid(polygon):
     """
     "*** YOUR CODE HERE ***"
     cx, cy, area, index = 0, 0, 0, 0
-    while index < len(polygon)-1:
-        x, y, xplus, yplus = latitude(polygon[index]), longitude(polygon[index]), latitude(polygon[index+1]), longitude(polygon[index+1])
-        temparea = x*yplus - xplus*y
-        cx, cy, area, index = cx+(x + xplus)*temparea, cy+(y + yplus)*temparea, area+temparea, index+1
-    area = area*0.5
+    while index < len(polygon) - 1:
+        x, y, x_next, y_next = latitude(polygon[index]), longitude(polygon[index]), latitude(polygon[index+1]), longitude(polygon[index+1])
+        temparea = x * y_next - x_next * y
+        cx, cy, area, index = cx + (x + x_next) * temparea, cy + (y + y_next) * temparea, area + temparea, index + 1
+    area = area * 0.5
     return [latitude(polygon[0]), longitude(polygon[0]), 0] if area == 0 else [(1/(6*area))*cx, (1/(6*area))*cy, abs(area)]
 
 def find_state_center(polygons):
@@ -268,9 +267,9 @@ def find_state_center(polygons):
     index, cx, cy, area = 0, 0, 0, 0 
     while index < len(polygons):
         centroid = find_centroid(polygons[index])
-        cx, cy, area, index = cx + centroid[0]*centroid[2], cy + centroid[1]*centroid[2], area + centroid[2], index + 1
+        centroid_x, centroid_y, centroid_area = centroid[0], centroid[1], centroid[2]
+        cx, cy, area, index = cx + centroid_x * centroid_area, cy + centroid_y * centroid_area, area + centroid_area, index + 1
     return make_position(cx/area, cy/area)
-
 
 ###################################
 # Phase 3: The Mood of the Nation #
@@ -287,8 +286,6 @@ def group_by_key(pairs):
     >>> group_by_key(example)
     {1: [2, 3, 2], 2: [4], 3: [2, 1]}
     """
-    # Optional: This implementation is slow because it traverses the list of
-    #           pairs one time for each key. Can you improve it?
     keys = [key for key, _ in pairs]
     return {key: [y for x, y in pairs if x == key] for key in keys}
 
@@ -302,12 +299,10 @@ def tweet_closest_state(tweet):
     """
     state_distances, index = [], 0
     while index < len(us_states):
-        current_state = list(us_state.keys())[index]
-        current_state_centroid = list(us_states.values())[index]
-        state_distances.append([current_state, geo_distance(tweet_location(tweet), find_state_center(curren_state_centroid))])
-        index += 1
+        curr_state, curr_state_centroid, index = list(us_states.keys())[index], list(us_states.values())[index], index + 1
+        state_distances.append([curr_state, geo_distance(tweet_location(tweet), find_state_center(curr_state_centroid))])
     state_distances = sorted(state_distances, key = lambda distances: distances[1])
-    return state_distances[0]
+    return state_distances[0] # First index of state_distances gives the smallest distance. Sorted by distance. 
 
 def group_tweets_by_state(tweets):
     """Return a dictionary that groups tweets by their nearest state center.
@@ -342,12 +337,12 @@ def analyze_multiple_tweets(tweets):
     Arguments:
     tweets -- list of tweet abstract data types
     """
-    average, total = 0, 0
+    average_sentiment, total_tweets = 0, 0
     for tweet in tweets:
-        if has_sentiment(analyze_tweet_sentiment(tweet)) == True:
-            average += sentiment_value(analyze_tweet_sentiment(tweet))
-            total += 1
-    return None if total == 0 else average/total    
+        curr_tweet_sentiment = analyze_tweet_sentiment(tweet)
+        if has_sentiment(curr_tweet_sentiment) == True:
+            average_sentiment, total_tweets = sentiment_value(curr_tweet_sentiment) + average_sentiment, total_tweets + 1
+    return None if total_tweets == 0 else average_sentiment/total_tweets    
 
 def average_sentiments(tweets_by_state):
     """Calculate the average sentiment of the states by averaging over all
@@ -365,11 +360,10 @@ def average_sentiments(tweets_by_state):
     "*** YOUR CODE HERE ***"
     averaged_state_sentiments, index = [], 0
     while index < len(tweets_by_state):
-
-        total = analyze_multiple_tweets(list(tweets_by_state.values())[index])
+        curr_state, curr_state_centroid = list(tweets_by_state.keys())[index], list(tweets_by_state.values())[index]
+        total, index = analyze_multiple_tweets(curr_state_centroid), index + 1
         if total is not None:
-            averaged_state_sentiments.append([list(tweets_by_state.keys())[index], total])
-        index += 1
+            averaged_state_sentiments.append([curr_state, total])
     return dict(x for x in averaged_state_sentiments)
 
 ##########################

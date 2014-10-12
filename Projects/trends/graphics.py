@@ -5,7 +5,7 @@ import math
 
 try:
     import tkinter
-except Exception as e:
+except ImportError as e:
     print('Could not load tkinter: ' + str(e))
 
 FRAME_TIME = 1/30
