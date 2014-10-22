@@ -43,9 +43,15 @@ class Place:
         """
         if insect.is_ant:
             # Phase 4: Special handling for BodyguardAnt
-            "*** YOUR CODE HERE ***"
-            assert self.ant is None, 'Two ants in {0}'.format(self)
-            self.ant = insect
+            if self.ant is not None and self.ant.can_contain(insect):
+                self.ant.contain_ant(insect)
+            elif self.ant is not None and insect.can_contain(self.ant):
+                temporary = self.ant
+                self.ant = insect
+                self.ant.contain_ant(temporary)
+            else:
+                assert self.ant is None, 'Two ants in {0}'.format(self)
+                self.ant = insect
         else:
             self.bees.append(insect)
         insect.place = self
@@ -56,7 +62,12 @@ class Place:
             assert self.ant == insect, '{0} is not in {1}'.format(insect, self)
             # Phase 4: Special handling for QueenAnt
             "*** YOUR CODE HERE ***"
-            self.ant = None
+            if insect.name == 'Bodyguard':
+                self.ant = insect.ant
+            elif insect.name == 'Queen' and insect.imposter == False:
+                return
+            else:
+                self.ant = None
         else:
             self.bees.remove(insect)
 
@@ -143,10 +154,15 @@ class Ant(Insect):
     damage = 0
     food_cost = 0
     blocks_path = True
+    container = False
 
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
         Insect.__init__(self, armor)
+
+    def can_contain(self, other):
+        return self.container == True and self.ant is None and other.container == False
+
 
 
 class HarvesterAnt(Ant):
@@ -559,7 +575,10 @@ class BodyguardAnt(Ant):
     """BodyguardAnt provides protection to other Ants."""
     name = 'Bodyguard'
     "*** YOUR CODE HERE ***"
-    implemented = False
+    food_cost = 4
+    armor = 2
+    container = True 
+    implemented = True
 
     def __init__(self):
         Ant.__init__(self, 2)
@@ -567,9 +586,13 @@ class BodyguardAnt(Ant):
 
     def contain_ant(self, ant):
         "*** YOUR CODE HERE ***"
+        self.ant = ant
 
     def action(self, colony):
         "*** YOUR CODE HERE ***"
+        if self.ant:
+            self.ant.action(colony)
+
 
 
 class QueenPlace:
@@ -586,7 +609,7 @@ class QueenPlace:
         "*** YOUR CODE HERE ***"
 
 
-class QueenAnt:  # You should change this line
+class QueenAnt(ScubaThrower):  # You should change this line
     """The Queen of the colony.  The game is over if a bee enters her place."""
 
     name = 'Queen'
