@@ -27,7 +27,7 @@ class Place:
         self.entrance = None  # A Place
         # Phase 1: Add an entrance to the exit
         "*** YOUR CODE HERE ***"
-        if self.exit:
+        if self.exit != None:
             self.exit.entrance = self
 
     def add_insect(self, insect):
@@ -150,8 +150,8 @@ class HarvesterAnt(Ant):
     """HarvesterAnt produces 1 additional food per turn for the colony."""
 
     name = 'Harvester'
+    food_cost = 2 
     implemented = True
-    food_cost = 2
 
     def action(self, colony):
         """Produce 1 additional food for the colony.
@@ -173,10 +173,8 @@ class ThrowerAnt(Ant):
 
     name = 'Thrower'
     implemented = True
-    damage = 1
     food_cost = 4
-    min_range = 0
-    max_range = 10
+    damage = 1
 
     def nearest_bee(self, hive):
         """Return the nearest Bee in a Place that is not the Hive, connected to
@@ -185,13 +183,7 @@ class ThrowerAnt(Ant):
         This method returns None if there is no such Bee (or none in range).
         """
         "*** YOUR CODE HERE ***"
-        curr_place, count = self.place, 0
-        while count < self.min_range:
-            curr_place, count = curr_place.entrance, count + 1
-        count = 0
-        while len(curr_place.bees) == 0 and curr_place.entrance != None and curr_place.entrance.name!= 'Hive' and count < self.max_range:
-            curr_place, count = curr_place.entrance, count + 1
-        return random_or_none(curr_place.bees)
+        return random_or_none(self.place.bees)
 
     def throw_at(self, target):
         """Throw a leaf at the target Bee, reducing its armor."""
@@ -445,35 +437,28 @@ class Water(Place):
         print('added', insect, insect.watersafe)
         "*** YOUR CODE HERE ***"
         Place.add_insect(self, insect)
-        if insect.watersafe == False:
+        if not insect.watersafe:
             insect.reduce_armor(insect.armor)
-
 
 class FireAnt(Ant):
     """FireAnt cooks any Bee in its Place when it expires."""
 
     name = 'Fire'
     damage = 3
-    "*** YOUR CODE HERE ***"
-    implemented = True
     food_cost = 4
+    "*** YOUR CODE HERE ***"
+    implemented = False
 
     def reduce_armor(self, amount):
         "*** YOUR CODE HERE ***"
-        new_armor = self.armor - amount
-        if new_armor <= 0:
-            for bee in self.place.bees[:]:
-                bee.reduce_armor(self.damage)
-        Ant.reduce_armor(self, amount)
+
 
 class LongThrower(ThrowerAnt):
     """A ThrowerAnt that only throws leaves at Bees at least 4 places away."""
 
     name = 'Long'
     "*** YOUR CODE HERE ***"
-    food_cost = 3
-    min_range = 4
-    implemented = True
+    implemented = False
 
 
 class ShortThrower(ThrowerAnt):
@@ -481,9 +466,7 @@ class ShortThrower(ThrowerAnt):
 
     name = 'Short'
     "*** YOUR CODE HERE ***"
-    food_cost = 3
-    max_range = 2
-    implemented = True
+    implemented = False
 
 
 "*** YOUR CODE HERE ***"
