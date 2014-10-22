@@ -5,6 +5,8 @@ import sys
 from ucb import main, interact, trace
 from collections import OrderedDict
 
+# Sony Theakanath cs61a-ach
+# Nik Mathur cs61a-acg
 
 ################
 # Core Classes #
@@ -119,7 +121,7 @@ class Bee(Insect):
         """Return True if this Bee cannot advance to the next Place."""
         # Phase 3: Special handling for NinjaAnt
         "*** YOUR CODE HERE ***"
-        return self.place.ant is not None
+        return self.place.ant is not None and self.place.ant.name is not 'Ninja'
 
     def action(self, colony):
         """A Bee's action stings the Ant that blocks its exit if it is blocked,
@@ -140,6 +142,7 @@ class Ant(Insect):
     implemented = False  # Only implemented Ant classes should be instantiated
     damage = 0
     food_cost = 0
+    blocks_path = True
 
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
@@ -488,6 +491,14 @@ class ShortThrower(ThrowerAnt):
 
 "*** YOUR CODE HERE ***"
 # The WallAnt class
+class WallAnt(Ant):
+    name = 'Wall'
+    implemented = True
+    food_cost = 4
+    armor = 4
+    
+    def __init__(self):
+        Ant.__init__(self, self.armor)
 
 
 class NinjaAnt(Ant):
@@ -497,14 +508,22 @@ class NinjaAnt(Ant):
     damage = 1
     "*** YOUR CODE HERE ***"
     implemented = False
+    blocks_path = False
+    food_cost = 6
 
     def action(self, colony):
         "*** YOUR CODE HERE ***"
+        for bee in self.place.bees[:]:
+            bee.reduce_armor(self.damage)
 
 
 "*** YOUR CODE HERE ***"
 # The ScubaThrower class
-
+class ScubaThrower(ThrowerAnt):
+    name = 'Scuba'
+    implemented = True
+    food_cost = 5
+    watersafe = True
 
 class HungryAnt(Ant):
     """HungryAnt will take three turns to digest a Bee in its place.
@@ -512,17 +531,28 @@ class HungryAnt(Ant):
     """
     name = 'Hungry'
     "*** YOUR CODE HERE ***"
-    implemented = False
+    implemented = True
+    food_cost = 4
+    time_to_digest = 3
 
     def __init__(self):
         Ant.__init__(self)
         "*** YOUR CODE HERE ***"
+        self.digesting = 0
 
     def eat_bee(self, bee):
         "*** YOUR CODE HERE ***"
+        if bee is not None:
+            bee.reduce_armor(bee.armor)
+            self.digesting = self.time_to_digest
 
     def action(self, colony):
         "*** YOUR CODE HERE ***"
+        if self.digesting > 0:
+            self.digesting -= 1
+        else:
+            curr_place = self.place
+            self.eat_bee(random_or_none(curr_place.bees))
 
 
 class BodyguardAnt(Ant):
