@@ -64,13 +64,12 @@ class Place:
             "*** YOUR CODE HERE ***"
             if insect.name == 'Bodyguard':
                 self.ant = insect.ant
-            elif insect.name == 'Queen' and insect.imposter == False:
+            elif insect.name == 'Queen' and insect.found_imposter == False:
                 return
             else:
                 self.ant = None
         else:
             self.bees.remove(insect)
-
         insect.place = None
 
     def __str__(self):
@@ -164,7 +163,6 @@ class Ant(Insect):
         return self.container == True and self.ant is None and other.container == False
 
 
-
 class HarvesterAnt(Ant):
     """HarvesterAnt produces 1 additional food per turn for the colony."""
 
@@ -208,7 +206,7 @@ class ThrowerAnt(Ant):
         while count < self.min_range:
             curr_place, count = curr_place.entrance, count + 1
         count = 0
-        while len(curr_place.bees) == 0 and curr_place.entrance != None and curr_place.entrance.name!= 'Hive' and count < self.max_range:
+        while len(curr_place.bees) == 0 and curr_place.entrance != None and curr_place.entrance.name != 'Hive' and count < self.max_range:
             curr_place, count = curr_place.entrance, count + 1
         return random_or_none(curr_place.bees)
 
@@ -506,7 +504,6 @@ class ShortThrower(ThrowerAnt):
 
 
 "*** YOUR CODE HERE ***"
-# The WallAnt class
 class WallAnt(Ant):
     name = 'Wall'
     implemented = True
@@ -523,7 +520,7 @@ class NinjaAnt(Ant):
     name = 'Ninja'
     damage = 1
     "*** YOUR CODE HERE ***"
-    implemented = False
+    implemented = True
     blocks_path = False
     food_cost = 6
 
@@ -603,10 +600,13 @@ class QueenPlace:
     """
     def __init__(self, colony_queen, ant_queen):
         "*** YOUR CODE HERE ***"
+        self.queen = colony_queen
+        self.ant = ant_queen
 
     @property
     def bees(self):
         "*** YOUR CODE HERE ***"
+        return self.queen.bees + self.ant.bees
 
 
 class QueenAnt(ScubaThrower):  # You should change this line
@@ -614,10 +614,20 @@ class QueenAnt(ScubaThrower):  # You should change this line
 
     name = 'Queen'
     "*** YOUR CODE HERE ***"
-    implemented = False
+    implemented = True
+    food_cost = 6
+    times_created = 0
+    armor = 1
+    found_imposter = False
+    ants = []
+
 
     def __init__(self):
         "*** YOUR CODE HERE ***"
+        ScubaThrower.__init__(self)
+        QueenAnt.times_created += 1
+        if QueenAnt.times_created > 1:
+            self.found_imposter = True
 
     def action(self, colony):
         """A queen ant throws a leaf, but also doubles the damage of ants
@@ -626,7 +636,23 @@ class QueenAnt(ScubaThrower):  # You should change this line
         Impostor queens do only one thing: reduce their own armor to 0.
         """
         "*** YOUR CODE HERE ***"
+        if self.found_imposter:
+            self.reduce_armor(self.armor)
+        else:
+            colony.queen, loc_next, loc_curr = QueenPlace(colony.queen, self.place), self.place.entrance, self.place
+            while loc_next.name != 'Hive' and loc_next != None:
+                loc_curr, loc_next = loc_next, loc_next.entrance
+            loc_next = loc_curr 
+            while loc_next != None:
+                if self.is_different(loc_next.ant):
+                    self.ants, loc_next.ant.damage = self.ants + [loc_next.ant], loc_next.ant.damage * 2
+                    if loc_next.ant.name == 'Bodyguard' and self.is_different(loc_next.ant.ant):
+                        loc_next.ant.ant.damage *= 2
+                loc_next = loc_next.exit
+            ScubaThrower.action(self, colony)
 
+    def is_different(self, compare_ant):
+        return compare_ant is not None and compare_ant is not self and compare_ant not in self.ants
 
 class AntRemover(Ant):
     """Allows the player to remove ants from the board in the GUI."""
@@ -647,18 +673,31 @@ def make_slow(action):
 
     action -- An action method of some Bee
     """
-    "*** YOUR CODE HERE ***"
+    def slow(colony):
+        if colony.time % 2 == 0:
+            action(colony)
+    return slow
 
 def make_stun(action):
     """Return a new action method that does nothing.
 
     action -- An action method of some Bee
     """
-    "*** YOUR CODE HERE ***"
+    def stun(colony):
+        pass
+    return stun
 
 def apply_effect(effect, bee, duration):
     """Apply a status effect to a Bee that lasts for duration turns."""
-    "*** YOUR CODE HERE ***"
+    orig_bee_action = bee.action
+    def apply_helper(colony):
+        nonlocal duration
+        if duration > 0:
+            effect(orig_bee_action)(colony)
+        else:
+            orig_bee_action(colony)
+        duration -= 1
+    bee.action = apply_helper
 
 
 class SlowThrower(ThrowerAnt):
@@ -666,7 +705,8 @@ class SlowThrower(ThrowerAnt):
 
     name = 'Slow'
     "*** YOUR CODE HERE ***"
-    implemented = False
+    implemented = True
+    food_cost = 4
 
     def throw_at(self, target):
         if target:
@@ -678,7 +718,8 @@ class StunThrower(ThrowerAnt):
 
     name = 'Stun'
     "*** YOUR CODE HERE ***"
-    implemented = False
+    implemented = True
+    food_cost = 6
 
     def throw_at(self, target):
         if target:
