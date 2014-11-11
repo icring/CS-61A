@@ -115,9 +115,13 @@ class Frame:
     def lookup(self, symbol):
         """Return the value bound to SYMBOL.  Errors if SYMBOL is not found."""
         "*** YOUR CODE HERE ***"
-        raise SchemeError("unknown identifier: {0}".format(str(symbol)))
-
-
+        item = self.bindings.get(symbol)
+        if item is not None:
+            return item
+        if self.parent is None:
+            raise SchemeError("unknown identifier: {0}".format(str(symbol)))
+        return self.parent.lookup(symbol)
+            
     def global_frame(self):
         """The global environment at the root of the parent chain."""
         e = self
@@ -217,6 +221,8 @@ def do_define_form(vals, env):
     if scheme_symbolp(target):
         check_form(vals, 2, 2)
         "*** YOUR CODE HERE ***"
+        env.define(target, scheme_eval(vals.second.first, env))
+        return target
     elif isinstance(target, Pair):
         "*** YOUR CODE HERE ***"
     else:
