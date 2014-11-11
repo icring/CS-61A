@@ -232,7 +232,7 @@ def do_quote_form(vals):
     """Evaluate a quote form with parameters VALS."""
     check_form(vals, 1, 1)
     "*** YOUR CODE HERE ***"
-
+    return vals.first
 
 def do_let_form(vals, env):
     """Evaluate a let form with parameters VALS in environment ENV."""
