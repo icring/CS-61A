@@ -4,7 +4,7 @@ eval/apply mutual recurrence, environment model, and read-eval-print loop.
 
 from scheme_primitives import *
 from scheme_reader import *
-from ucb import main, trace
+from ucb import main, trace 
 
 ##############
 # Eval/Apply #
@@ -65,6 +65,14 @@ def scheme_apply(procedure, args, env):
     else:
         raise SchemeError("Cannot call {0}".format(str(procedure)))
 
+#Converting args into a Python list of arguments
+def convert(a, lst):
+    if a == nil:
+        return lst
+    else:
+        lst.append(a.first)
+        return convert(a.second, lst)
+
 def apply_primitive(procedure, args, env):
     """Apply PrimitiveProcedure PROCEDURE to a Scheme list of ARGS in ENV.
 
@@ -75,6 +83,15 @@ def apply_primitive(procedure, args, env):
     4
     """
     "*** YOUR CODE HERE ***"
+    py_lst = convert(args, [])
+    if procedure.use_env is True:
+        py_lst.append(env)
+    try:
+        return procedure.fn(*py_lst)
+    except TypeError as e:
+        raise SchemeError(e)
+
+
 
 ################
 # Environments #
