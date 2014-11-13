@@ -235,7 +235,12 @@ def do_define_form(vals, env):
         return target
     elif isinstance(target, Pair):
         "*** YOUR CODE HERE ***"
-        return do_define_form(target.first, env)
+        # do_define_form(target.first, env)
+        # return target.rest
+        # do_lambda_form(target.second, env)
+        print(target)
+    elif type(target) != int:
+        print(target)
     else:
         raise SchemeError("bad argument to define")
 
@@ -349,6 +354,11 @@ def check_formals(formals):
     >>> check_formals(read_line("(a b c)"))
     """
     "*** YOUR CODE HERE ***"
+    for symbol in formals:
+        if scheme_symbolp(symbol) == False:
+            raise SchemeError("Not well-formed list of symbols.")
+        if formals.inlist(symbol):
+            raise SchemeError("Duplicate found in list!")
 
 ##################
 # Tail Recursion #

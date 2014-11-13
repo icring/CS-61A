@@ -89,6 +89,15 @@ class Pair:
         else:
             raise TypeError("ill-formed list")
 
+    def inlist(self, item):
+        initial, dup = False, False
+        for x in self:
+            if x == item and initial == False:
+                initial = True
+            elif initial == True and x == item:
+                return True
+        return False
+
 class nil:
     """The empty list"""
 
