@@ -146,6 +146,10 @@ class Frame:
         """
         frame = Frame(self)
         "*** YOUR CODE HERE ***"
+        if len(formals) != len(vals):
+            raise SchemeError("Formals length not matching vals.")
+        for x in range(0, len(formals)):
+            frame.bindings[formals[x]] = vals[x]
         return frame
 
     def define(self, sym, val):
@@ -231,6 +235,7 @@ def do_define_form(vals, env):
         return target
     elif isinstance(target, Pair):
         "*** YOUR CODE HERE ***"
+        return do_define_form(target.first, env)
     else:
         raise SchemeError("bad argument to define")
 
