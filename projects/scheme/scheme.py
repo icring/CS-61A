@@ -235,10 +235,10 @@ def do_define_form(vals, env):
         return target
     elif isinstance(target, Pair):
         "*** YOUR CODE HERE ***"
-        # do_define_form(target.first, env)
-        # return target.rest
-        # do_lambda_form(target.second, env)
-        print(target)
+        target, params, body = target.first, target.second, vals.second
+        if not scheme_symbolp(target):
+            raise SchemeError("Not a valid symbol!")
+        env.define(target, do_lambda_form(Pair(params, body), env))
     elif type(target) != int:
         print(target)
     else:
