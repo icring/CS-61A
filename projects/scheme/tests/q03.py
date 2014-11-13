@@ -9,24 +9,28 @@ test = {
   'suites': [
     [
       {
+        'locked': True,
         'test': r"""
         >>> env = create_global_frame()
         >>> twos = Pair(2, Pair(2, nil))
         >>> plus = PrimitiveProcedure(scheme_add) # + procedure
         >>> scheme_apply(plus, twos, env)
-        4
+        b40228ad6a6d47b9a9cf2c25fc37755c
+        # locked
         # choice: 4
         # choice: SchemeError
         """,
         'type': 'doctest'
       },
       {
+        'locked': True,
         'test': r"""
         >>> env = create_global_frame()
         >>> twos = Pair(2, Pair(2, nil))
         >>> oddp = PrimitiveProcedure(scheme_oddp) # odd? procedure
         >>> scheme_apply(oddp, twos, env)
-        SchemeError
+        377055b6dcfd7e506af592ae723fa0cb
+        # locked
         # choice: True
         # choice: False
         # choice: SchemeError

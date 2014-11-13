@@ -13,7 +13,7 @@ test = {
   'suites': [
     [
       {
-        'answer': 'Pair(A, Pair(B, nil)), where: A is the symbol being bound, B is an expression whose value should be bound to A',
+        'answer': '4603abca9e6c9956574a67ffb7be2487',
         'choices': [
           r"""
           Pair(A, Pair(B, nil)), where:
@@ -41,17 +41,19 @@ test = {
             B is an expression whose value should be bound to A
           """
         ],
+        'locked': True,
         'question': 'What is the structure of the argument vals?',
         'type': 'concept'
       },
       {
-        'answer': 'define',
+        'answer': 'b776d636d5ff3f2a7a941f90838c83de',
         'choices': [
           'make_call_frame',
           'define',
           'lookup',
           'bindings'
         ],
+        'locked': True,
         'question': r"""
         What method of a Frame instance will bind
         a value to a symbol in that frame?
@@ -59,12 +61,14 @@ test = {
         'type': 'concept'
       },
       {
+        'locked': True,
         'test': r"""
         >>> eval('''
         ...   (define size 2)
         ...   size
         ... ''')
-        2
+        f0c1f6d92f853abf152683e4827fb490
+        # locked
         # choice: 'size'
         # choice: None
         # choice: SchemeError
@@ -73,7 +77,8 @@ test = {
         ...   (define x (+ 2 3))
         ...   x
         ... ''')
-        5
+        4c165dab3afb51604895132221bf0eb7
+        # locked
         # choice: Pair('+', Pair(2, Pair(3, nil)))
         # choice: 5
         # choice: SchemeError

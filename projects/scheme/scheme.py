@@ -2,6 +2,10 @@
 eval/apply mutual recurrence, environment model, and read-eval-print loop.
 """
 
+# Sony Theakanath - cs61a-ach
+# Nik Mathur - cs61a-acg
+# CS 61A November 12, 2014
+
 from scheme_primitives import *
 from scheme_reader import *
 from ucb import main, trace 
@@ -303,6 +307,10 @@ def do_begin_form(vals, env):
     """Evaluate begin form with parameters VALS in environment ENV."""
     check_form(vals, 1)
     "*** YOUR CODE HERE ***"
+    for x in range(0, len(vals) - 1):
+        scheme_eval(vals[x], env)   
+    return vals[len(vals) - 1]
+    
 
 LOGIC_FORMS = {
         "and": do_and_form,
