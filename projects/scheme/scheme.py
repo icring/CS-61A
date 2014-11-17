@@ -261,9 +261,18 @@ def do_let_form(vals, env):
         raise SchemeError("bad bindings list in let form")
 
     # Add a frame containing bindings
-    names, values = nil, nil
+    # bindings are formals
+    #values are values of formals
+    names, vals = nil, nil
     "*** YOUR CODE HERE ***"
-    new_env = env.make_call_frame(names, values)
+    for val in bindings:
+        if val.second.second != nil:
+            raise SchemeError("Too many parameters for binding.")
+        if not scheme_symbolp(val.first):
+            raise SchemeError("False symbol.")
+        vals = Pair(scheme_eval(val[1], env), vals)
+        names = Pair(val.first, names)
+    new_env = env.make_call_frame(names, vals)
 
     # Evaluate all but the last expression after bindings, and return the last
     last = len(exprs)-1
@@ -334,7 +343,6 @@ def do_cond_form(vals, env):
                 raise SchemeError("badly formed else clause")
         else:
             test = scheme_eval(clause.first, env)
-        print(clause.second)
         if scheme_true(test):
             "*** YOUR CODE HERE ***"
             if len(clause.second) > 1:
