@@ -283,11 +283,9 @@ def do_if_form(vals, env):
     exp = vals.second
     if scheme_true(vals.first):
         return exp.first
-    else:
-        if len(exp) > 1:
-            return exp[1]
-        else:
-            return okay
+    if len(exp) > 1:
+        return exp[1]
+    return okay
 
 def do_and_form(vals, env):
     """Evaluate short-circuited and with parameters VALS in environment ENV."""
@@ -341,6 +339,8 @@ def do_cond_form(vals, env):
             "*** YOUR CODE HERE ***"
             if len(clause.second) > 1:
                 return Pair('begin', clause.second)
+            elif clause.second == nil:
+                return True
             return clause.second.first
     return okay
 
