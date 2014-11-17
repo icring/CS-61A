@@ -14,7 +14,6 @@ left_to_right = {left: right for left, right in brackets}
 # The set of all left and right brackets.
 all_brackets = set(left_to_right.keys()).union(set(left_to_right.values()))
 
-'''
 def tokenize(line):
     """Convert a string into a list of tokens.
 
@@ -380,7 +379,6 @@ def interpret_mobile(s):
         if test_mobile is not None:
             return test_mobile
     return None
-'''
 
 class Stream:
     """A lazily computed recursive list."""
@@ -529,25 +527,14 @@ def rle(s, max_run_length=10):
     [(1, 1), (1, 2), (1, 3)]
     """
     "*** YOUR CODE HERE ***"
-    observed, i = [], iter(s)
-    current_elem, count = next(i), 1
-    while True:
-        try:
-            el = next(i)
-            if el == current_elem:
-                count += 1
-                if count == max_run_length:
-                    observed.append((count, current_elem))
-                    current_elem = next(i)
-                    count = 1
-            else:
-                observed.append((count, current_elem))
-                current_elem = el
-                count = 1
-        except StopIteration:
-            observed.append((count, current_elem))
+    count = 1
+    while s.rest is not Stream.empty and s.rest.first == s.first:
+        if count == max_run_length:
             break
-    return observed
+        count += 1
+        s = s.rest
+    to = (count, s.first)
+    return Stream(to, lambda: rle(s.rest))
 
 from urllib.request import urlopen
 

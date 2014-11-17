@@ -26,8 +26,11 @@
 ; Problem 18
 ;; Turns a list of pairs into a pair of lists
 (define (zip pairs)
-  'YOUR-CODE-HERE
-  )
+  ; (cond ((null? pairs) nil)
+  ; (else (cons (cons (car (car pairs)) (zip (cdr pairs))) (cons nil nil)) )
+  ; )
+  'sdfdasfss
+)
 
 (zip '())
 ; expect (() ())
