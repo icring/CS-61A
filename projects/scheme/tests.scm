@@ -10,6 +10,8 @@
 ;;; *** Add more of your own here! ***
 ;;; **********************************
 
+
+
 ;;; These are examples from several sections of "The Structure
 ;;; and Interpretation of Computer Programs" by Abelson and Sussman.
 
@@ -58,7 +60,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Move the following (exit) line to run additional tests. ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(exit)
 
 
 ;;; 1.1.2
@@ -106,6 +107,8 @@ circumference
   (sum-of-squares (+ a 1) (* a 2)))
 (f 5)
 ; expect 136
+
+(exit)
 
 ;;; 1.1.6
 

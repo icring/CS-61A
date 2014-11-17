@@ -280,10 +280,25 @@ def do_if_form(vals, env):
     """Evaluate if form with parameters VALS in environment ENV."""
     check_form(vals, 2, 3)
     "*** YOUR CODE HERE ***"
+    exp = vals.second
+    if scheme_true(vals.first):
+        return exp.first
+    else:
+        if len(exp) > 1:
+            return exp[1]
+        else:
+            return okay
 
 def do_and_form(vals, env):
     """Evaluate short-circuited and with parameters VALS in environment ENV."""
     "*** YOUR CODE HERE ***"
+    if len(vals) == 0:
+        return True
+    if len(vals) == 1:
+        return vals.first
+    if scheme_false(scheme_eval(vals.first, env)):
+        return False
+    return do_and_form(vals.second, env)
 
 def quote(value):
     """Return a Scheme expression quoting the Scheme VALUE.
@@ -299,6 +314,14 @@ def quote(value):
 def do_or_form(vals, env):
     """Evaluate short-circuited or with parameters VALS in environment ENV."""
     "*** YOUR CODE HERE ***"
+    if vals is nil:
+        return False
+    if vals.second is nil:
+        return vals.first
+    ev = scheme_eval(vals.first, env)
+    if scheme_true(ev):
+        return quote(ev)
+    return do_or_form(vals.second, env)
 
 def do_cond_form(vals, env):
     """Evaluate cond form with parameters VALS in environment ENV."""
@@ -313,8 +336,12 @@ def do_cond_form(vals, env):
                 raise SchemeError("badly formed else clause")
         else:
             test = scheme_eval(clause.first, env)
+        print(clause.second)
         if scheme_true(test):
             "*** YOUR CODE HERE ***"
+            if len(clause.second) > 1:
+                return Pair('begin', clause.second)
+            return clause.second.first
     return okay
 
 def do_begin_form(vals, env):

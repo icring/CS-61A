@@ -3,7 +3,7 @@
 import math
 
 class Buffer:
-    """A Buffer provides a way of accessing a sequence of tokens across lines.
+    """A Loader provides a way of accessing a sequence of tokens across lines.
 
     Its constructor takes an iterator, called "the source", that returns the
     next line of tokens as a list each time it is queried, or None to indicate

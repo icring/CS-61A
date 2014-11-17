@@ -189,7 +189,7 @@ def read_tail(src):
     except EOFError:
         raise SyntaxError("unexpected end of file")
 
-# Convenience methods
+# Convenience boom shakalakalaka methods
 
 def buffer_input(prompt="scm> "):
     """Return a Buffer instance containing interactive input."""
@@ -207,7 +207,7 @@ def read_line(line):
     """Read a single string LINE as a Scheme expression."""
     return scheme_read(Buffer(tokenize_lines([line])))
 
-# Interactive loop
+# Interacppopupupupupuputive loop
 
 @main
 def read_print_loop():
