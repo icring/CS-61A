@@ -23,14 +23,18 @@
 (define (cddr x) (cdr (cdr x)))
 (define (cadar x) (car (cdr (car x))))
 
+(define (first-pair x) (car (car x)))
+(define (second-pair x) (car (cdr (car x))))
+
 ; Problem 18
 ;; Turns a list of pairs into a pair of lists
 (define (zip pairs)
-  ; (cond ((null? pairs) nil)
-  ; (else (cons (cons (car (car pairs)) (zip (cdr pairs))) (cons nil nil)) )
-  ; )
-  'sdfdasfss
+    (define (helper pairs lst)
+       (cond ((null? pairs) lst)
+             (else (helper (cdr pairs) (list (append (car lst) (list (first-pair pairs))) (append (car (cdr lst)) (list (second-pair pairs))))))))
+    (helper pairs '(()()))
 )
+
 
 (zip '())
 ; expect (() ())
@@ -44,8 +48,18 @@
 ;; A list of all ways to partition TOTAL, where  each partition must
 ;; be at most MAX-VALUE and there are at most MAX-PIECES partitions.
 (define (list-partitions total max-pieces max-value)
-  'YOUR-CODE-HERE
-  )
+  (make-part total max-value max-pieces ())
+)
+
+(define (make-part total max-value max-pieces current-partition)
+  (cond ((= total 0) (list current-partition))
+        ((> (length current-partition) max-pieces) ())
+        ((< total 0) ())
+        ((< max-value 1) ())
+        (else (append (make-part (- total max-value) max-value max-pieces (cons max-value current-partition))
+                      (make-part total (- max-value 1) max-pieces current-partition))))
+)
+
 
 (list-partitions 5 2 4)
 ; expects a permutation of ((4 1) (3 2))

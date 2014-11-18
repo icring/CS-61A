@@ -426,6 +426,7 @@ def scheme_optimized_eval(expr, env):
         if (scheme_symbolp(first) # first might be unhashable
             and first in LOGIC_FORMS):
             "*** YOUR CODE HERE ***"
+            expr = LOGIC_FORMS[first](rest, env)
         elif first == "lambda":
             return do_lambda_form(rest, env)
         elif first == "mu":
@@ -436,13 +437,17 @@ def scheme_optimized_eval(expr, env):
             return do_quote_form(rest)
         elif first == "let":
             "*** YOUR CODE HERE ***"
+            expr, env = do_let_form(rest, env)
         else:
             "*** YOUR CODE HERE ***"
+            procedure = scheme_optimized_eval(first, env)
+            args = rest.map(lambda operand: scheme_eval(operand, env))
+            return scheme_apply(procedure, args, env)
 
 ################################################################
 # Uncomment the following line to apply tail call optimization #
 ################################################################
-# scheme_eval = scheme_optimized_eval
+scheme_eval = scheme_optimized_eval
 
 
 ################
