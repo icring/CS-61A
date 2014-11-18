@@ -50,13 +50,12 @@
 
 (define (make-part total max-value max-pieces current-partition)
   (cond ((= total 0) (list current-partition))
-        ((> (length current-partition) max-pieces) ())
+        ((>= (length current-partition) max-pieces) ())
         ((< total 0) ())
         ((< max-value 1) ())
-        (else (append (make-part (- total max-value) max-value max-pieces (cons max-value current-partition))
+        (else (append (make-part (- total max-value) max-value max-pieces (append current-partition (list max-value)))
                       (make-part total (- max-value 1) max-pieces current-partition))))
 )
-
 
 (list-partitions 5 2 4)
 ; expects a permutation of ((4 1) (3 2))
