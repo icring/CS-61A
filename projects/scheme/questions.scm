@@ -23,15 +23,12 @@
 (define (cddr x) (cdr (cdr x)))
 (define (cadar x) (car (cdr (car x))))
 
-(define (first-pair x) (car (car x)))
-(define (second-pair x) (car (cdr (car x))))
-
 ; Problem 18
 ;; Turns a list of pairs into a pair of lists
 (define (zip pairs)
     (define (helper pairs lst)
        (cond ((null? pairs) lst)
-             (else (helper (cdr pairs) (list (append (car lst) (list (first-pair pairs))) (append (car (cdr lst)) (list (second-pair pairs))))))))
+             (else (helper (cdr pairs) (list (append (car lst) (list (caar pairs))) (append (car (cdr lst)) (list (cadar pairs))))))))
     (helper pairs '(()()))
 )
 
