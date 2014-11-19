@@ -237,7 +237,7 @@ def do_define_form(vals, env):
     if scheme_symbolp(target):
         check_form(vals, 2, 2)
         "*** YOUR CODE HERE ***"
-        env.define(target, scheme_eval(vals.second.first, env))
+        env.define(target, scheme_eval(vals[1], env))
         return target
     elif isinstance(target, Pair):
         "*** YOUR CODE HERE ***"
@@ -245,6 +245,7 @@ def do_define_form(vals, env):
         if not scheme_symbolp(target):
             raise SchemeError("Not a valid symbol!")
         env.define(target, do_lambda_form(Pair(params, body), env))
+        return target
     elif type(target) != int:
         print(target)
     else:
@@ -293,11 +294,10 @@ def do_if_form(vals, env):
     """Evaluate if form with parameters VALS in environment ENV."""
     check_form(vals, 2, 3)
     "*** YOUR CODE HERE ***"
-    exp = vals.second
-    if scheme_true(vals.first):
-        return exp.first
-    if len(exp) > 1:
-        return exp[1]
+    if scheme_true(scheme_eval(vals[0], env)):
+        return vals[1]
+    if len(vals.second) > 1:
+        return vals[2]
     return okay
 
 def do_and_form(vals, env):
@@ -349,10 +349,11 @@ def do_cond_form(vals, env):
             test = scheme_eval(clause.first, env)
         if scheme_true(test):
             "*** YOUR CODE HERE ***"
+            if scheme_true(test):
+                if clause.second == nil:
+                    return test
             if len(clause.second) > 1:
-                return Pair('begin', clause.second)
-            elif clause.second == nil:
-                return True
+                return do_begin_form(clause.second, env)
             return clause.second.first
     return okay
 
@@ -441,8 +442,17 @@ def scheme_optimized_eval(expr, env):
         else:
             "*** YOUR CODE HERE ***"
             procedure = scheme_optimized_eval(first, env)
-            args = rest.map(lambda operand: scheme_eval(operand, env))
-            return scheme_apply(procedure, args, env)
+            args = rest.map(lambda operand: scheme_optimized_eval(operand, env))
+            if isinstance(procedure, PrimitiveProcedure):
+                return apply_primitive(procedure, args, env)
+            elif isinstance(procedure, LambdaProcedure):
+                env = procedure.env.make_call_frame(procedure.formals, args)
+            elif isinstance(procedure, MuProcedure):
+                env = env.make_call_frame(procedure.formals, args)
+            else:
+                raise SchemeError("Cannot call {0}".format(str(procedure)))
+            expr = procedure.body
+
 
 ################################################################
 # Uncomment the following line to apply tail call optimization #

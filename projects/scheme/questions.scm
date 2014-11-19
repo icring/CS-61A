@@ -77,25 +77,26 @@
 ;; Converts all let special forms in EXPR into equivalent forms using lambda
 (define (analyze expr)
   (cond ((atom? expr)
-         'YOUR-CODE-HERE
+         expr
          )
         ((quoted? expr)
-         'YOUR-CODE-HERE
+         expr
          )
         ((or (lambda? expr)
              (define? expr))
          (let ((form   (car expr))
                (params (cadr expr))
                (body   (cddr expr)))
-           'YOUR-CODE-HERE
+           expr
            ))
         ((let? expr)
          (let ((values (cadr expr))
                (body   (cddr expr)))
-           'YOUR-CODE-HERE
+           (list (car (zip values)))
+           ;(cons (lambda (car (zip values)) body) (cdr (zip values)))
            ))
         (else
-         'YOUR-CODE-HERE
+          (analyze (cdr expr))
          )))
 
 (analyze 1)

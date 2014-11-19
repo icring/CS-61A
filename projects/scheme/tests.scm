@@ -108,7 +108,7 @@ circumference
 (f 5)
 ; expect 136
 
-(exit)
+
 
 ;;; 1.1.6
 
@@ -129,6 +129,8 @@ circumference
   ((if (> b 0) + -) a b))
 (a-plus-abs-b 3 -2)
 ; expect 5
+
+
 
 ;;; 1.1.7
 
@@ -157,6 +159,8 @@ circumference
 (square (sqrt 1000))
 ; expect 1000.000369924366
 
+
+
 ;;; 1.1.8
 
 (define (sqrt x)
@@ -180,6 +184,8 @@ circumference
 
 (square (sqrt 1000))
 ; expect 1000.000369924366
+
+
 
 ;;; 1.3.1
 
@@ -225,6 +231,8 @@ circumference
       (y (+ x 2)))
   (* x y))
 ; expect 21
+
+
 
 ;;; 2.1.1
 
@@ -379,6 +387,7 @@ one-through-four
 (enumerate-interval 2 7)
 ; expect (2 3 4 5 6 7)
 
+
 (define (enumerate-tree tree)
   (cond ((null? tree) nil)
         ((not (pair? tree)) (list tree))
@@ -497,6 +506,7 @@ one-through-four
 (if '() 1 2)
 ; expect 1
 
+
 (or false true)
 ; expect True
 
@@ -583,7 +593,6 @@ one-through-four
 ;;; Extra credit ;;;
 ;;;;;;;;;;;;;;;;;;;;
 
-(exit)
 
 ; Tail call optimization test
 (define (sum n total)
