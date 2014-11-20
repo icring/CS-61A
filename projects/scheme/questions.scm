@@ -22,13 +22,15 @@
 (define (cadr x) (car (cdr x)))
 (define (cddr x) (cdr (cdr x)))
 (define (cadar x) (car (cdr (car x))))
+(define (caadr x) (car (car (cdr x))))
 
 ; Problem 18
 ;; Turns a list of pairs into a pair of lists
 (define (zip pairs)
     (define (helper pairs lst)
        (cond ((null? pairs) lst)
-             (else (helper (cdr pairs) (list (append (car lst) (list (caar pairs))) (append (car (cdr lst)) (list (cadar pairs))))))))
+             (else (helper (cdr pairs) (list (append (car lst) (list (caar pairs)))
+                                             (append (car (cdr lst)) (list (cadar pairs))))))))
     (helper pairs '(()()))
 )
 
@@ -45,16 +47,16 @@
 ;; A list of all ways to partition TOTAL, where  each partition must
 ;; be at most MAX-VALUE and there are at most MAX-PIECES partitions.
 (define (list-partitions total max-pieces max-value)
-  (make-part total max-value max-pieces ())
+  (help-part total max-value max-pieces ())
 )
 
-(define (make-part total max-value max-pieces current-partition)
-  (cond ((= total 0) (list current-partition))
-        ((>= (length current-partition) max-pieces) ())
+(define (help-part total value pieces partition)
+  (cond ((= total 0) (list partition))
+        ((>= (length partition) pieces) ())
         ((< total 0) ())
-        ((< max-value 1) ())
-        (else (append (make-part (- total max-value) max-value max-pieces (append current-partition (list max-value)))
-                      (make-part total (- max-value 1) max-pieces current-partition))))
+        ((< value 1) ())
+        (else (append (help-part (- total value) value pieces (append partition (list value)))
+                      (help-part total (- value 1) pieces partition))))
 )
 
 (list-partitions 5 2 4)
@@ -77,26 +79,25 @@
 ;; Converts all let special forms in EXPR into equivalent forms using lambda
 (define (analyze expr)
   (cond ((atom? expr)
-         expr
+           expr
          )
         ((quoted? expr)
-         expr
-         )
+           expr
+         )  
         ((or (lambda? expr)
              (define? expr))
          (let ((form   (car expr))
                (params (cadr expr))
                (body   (cddr expr)))
-           expr
+               (append (list form params) (apply-to-all analyze body))
            ))
         ((let? expr)
          (let ((values (cadr expr))
                (body   (cddr expr)))
-           (list (car (zip values)))
-           ;(cons (lambda (car (zip values)) body) (cdr (zip values)))
-           ))
+               (list (append (list 'lambda (car (zip values))) (apply-to-all analyze body)) (caadr (zip values)))
+           ))  
         (else
-          (analyze (cdr expr))
+          expr
          )))
 
 (analyze 1)
@@ -133,9 +134,8 @@
 ;; Problem 21 (optional)
 ;; Draw the hax image using turtle graphics.
 (define (hax d k)
-  'YOUR-CODE-HERE
-  nil)
-
+  'optional
+ )
 
 
 
