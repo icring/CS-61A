@@ -146,7 +146,7 @@ class Frame:
         "*** YOUR CODE HERE ***"
         if len(formals) != len(vals):
             raise SchemeError("Formals length not matching vals.")
-        for x in range(0, len(formals)):
+        for x in range(len(formals)):
             frame.bindings[formals[x]] = vals[x]
         return frame
 
@@ -259,16 +259,13 @@ def do_let_form(vals, env):
     if not scheme_listp(bindings):
         raise SchemeError("bad bindings list in let form")
 
-    # Add a frame containing bindings
-    # bindings are formals
-    #values are values of formals
     names, vals = nil, nil
     "*** YOUR CODE HERE ***"
     for val in bindings:
         if val.second.second != nil:
             raise SchemeError("Too many parameters for binding.")
         if not scheme_symbolp(val.first):
-            raise SchemeError("False symbol.")
+            raise SchemeError("Not a symbol.")
         vals = Pair(scheme_eval(val[1], env), vals)
         names = Pair(val.first, names)
     new_env = env.make_call_frame(names, vals)
@@ -323,9 +320,9 @@ def do_or_form(vals, env):
         return False
     if vals.second is nil:
         return vals.first
-    ev = scheme_eval(vals.first, env)
-    if scheme_true(ev):
-        return quote(ev)
+    val = scheme_eval(vals.first, env)
+    if scheme_true(val):
+        return quote(val)
     return do_or_form(vals.second, env)
 
 def do_cond_form(vals, env):
