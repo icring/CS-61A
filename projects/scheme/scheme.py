@@ -73,14 +73,6 @@ def scheme_apply(procedure, args, env):
     else:
         raise SchemeError("Cannot call {0}".format(str(procedure)))
 
-#Converting args into a Python list of arguments
-def convert(a, lst):
-    if a == nil:
-        return lst
-    else:
-        lst.append(a.first)
-        return convert(a.second, lst)
-
 def apply_primitive(procedure, args, env):
     """Apply PrimitiveProcedure PROCEDURE to a Scheme list of ARGS in ENV.
 
@@ -91,8 +83,10 @@ def apply_primitive(procedure, args, env):
     4
     """
     "*** YOUR CODE HERE ***"
-    py_lst = convert(args, [])
-    if procedure.use_env is True:
+    py_lst = []
+    for arg in args:
+        py_lst.append(arg)
+    if procedure.use_env:
         py_lst.append(env)
     try:
         return procedure.fn(*py_lst)
@@ -361,9 +355,10 @@ def do_begin_form(vals, env):
     """Evaluate begin form with parameters VALS in environment ENV."""
     check_form(vals, 1)
     "*** YOUR CODE HERE ***"
-    for x in range(0, len(vals) - 1):
+    len_vals = len(vals) - 1
+    for x in range(len_vals):
         scheme_eval(vals[x], env)   
-    return vals[len(vals) - 1]
+    return vals[len_vals]
     
 
 LOGIC_FORMS = {

@@ -1,18 +1,273 @@
 ;;; Test cases for Scheme.
-;;;
-;;; In order to run only a prefix of these examples, add the line
-;;;
-;;; (exit)
-;;;
-;;; after the last test you wish to run.
 
-;;; **********************************
-;;; *** Add more of your own here! ***
-;;; **********************************
+;;; ****************************************
+;;; *** USER TESTS NOT PROVIDED BY ADMIN ***
+;;; ****************************************
 
-;;; Problem 5A
+;;; ***************
+;;; ** Problem 1 **
+;;; ***************
+
+(nil)
+; expect Error
+
+nil
+; expect ()
+
+''bagel
+; expect (quote bagel)
+
+;;; ***************
+;;; ** Problem 2 **
+;;; ***************
+
+'(nil 3)
+; expect (() 3)
+
+(1 2 . 3)
+; expect Error
+
+(cons 1 (cons 2 3))
+; expect (1 2 . 3)
+
+'(cons 1 (cons 2 3))
+; expect (cons 1 (cons 2 3))
+
+(cons 1 (cons (cons 2 3) 2))
+; expect (1 (2 . 3) . 2)
+
+'(1 2 . 3 4)
+; expect Error
+
+'(1 2 . (3 4))
+; expect (1 2 3 4)
+
+'(1 2 . (3 . (4 . 5)))
+; expect (1 2 3 4 . 5)
+
+(cons (cons (cons nil nil) nil) nil)
+; expect (((())))
+
+(cons (cons (cons nil 2) nil) nil)
+; expect (((() . 2)))
+
+;;; *****************
+;;; ** Problem 3/4 **
+;;; *****************
+
++
+; expect #[primitive]
+
+%
+; expect Error
+
+(odd? 0)
+; expect False
+
+(odd? .1)
+; expect False
+
+(odd? '())
+; expect Error
+
+(odd?)
+; expect Error
+
+(+ 80000 80 5)
+; expect 80085
+
+(/ 1 0)
+; expect Error
+
+(/ 0 1)
+; expect 0
+
+(/ 0 1 1)
+; expect Error
+
+(* 0 1 0)
+; expect 0
+
+(+)
+; expect 0
+
+(-)
+; expect Error
+
+(*)
+; expect 1
+
+(/)
+; expect Error
+
+;;; *****************
+;;; ** Problem 5/6 **
+;;; *****************
+
+(eval (cons 'car '('(1 2))))
+; expect 1
+
+(car '(a b))
+; expect a
+
+'(program by . (nik . (and . (sony))))
+; expect (program by nik and sony)
+
+'(hella . (cool . (tests)))
+; expect (hella cool tests)
+
+(define nik-birthday 1996)
+; nik-birthday
+
+(define sony-birthday nik-birthday)
+; sony-birthday
+
+(define graduation 2018)
+; graduation
+
+(* nik-birthday sony-birthday graduation)
+; expect 8039744288
+
+'nil
+; expect ()
+
+(quote nil)
+; expect ()
+
+'(quote nil)
+; expect (quote ())
+
+;;; ******************
+;;; ** Problem 7-17 **
+;;; ******************
+
+(define f (mu (x) (+ x y)))
+; expect f
+
+(define g (lambda (x y) (f (+ x x))))
+; expect g
+
+(g 3 7)
+; expect 13
+
+(define (deep-map fn s)
+    (cond ((null? s) nil)
+        ((list? (car s)) (cons (deep-map fn (car s)) (deep-map fn (cdr s))))
+        (else (cons (fn (car s)) (deep-map fn (cdr s))))
+  ))
+; expect deep-map
+
+(define (substitute s old new)
+  (define (fn x)
+    (if (eq? x old)
+        new x))
+  (deep-map fn s))
+; expect substitute
+
+(substitute '(c a b) 'b 'l)
+; expect (c a l)
+
+(define (sign x)
+  (cond ((> x 0) 1)
+      ((< x 0) -1)
+      (else 0)))
+; expect sign
+
+(sign -42)
+; expect -1
+
+(sign 0)
+; expect 0
+
+(sign 42)
+; expect 1
+
+(define (empty? s) (null? s))
+; expect empty?
+
+(define (contains? s v)
+    (cond ((empty? s) #f)
+          ((= (car s) v) #t)
+          (else (contains? (cdr s) v))))
+; expect contains?
+
+(define odds (list 3 5 7 9))
+; expect odds
+
+(define sony 3)
+; expect sony
+
+(if (= 3 sony) 'nik 'sad)
+; expect nik
+
+(contains? odds 3)
+; expect True
+
+(if (= 1 2) 3 4 5)
+; expect Error
+
+(define operate (lambda (op1 op2) (lambda (x y) (op2 (op1 x y) y))))
+; expect operate
+
+((operate * +) 2 3)
+; expect 9
+
+(define hello-world (print 51))
+; expect hello-world
+
+(hello-world)
+; expect Error
+
+hello-world
+; expect okay
+
+(define x 1)
+; expect x
+
+(define y 2)
+; expect y
+
+(let ((x 3) (y 4)) (+ x y))
+; expect 7
+
+(let ((x 3)) (+ x y)) 
+; expect 5
+
+(+ x y)
+; expect 3
+
+(define (union s t)
+    (cond ((empty? s) t)
+          ((empty? t) s)
+        ((= (car s) (car t)) (cons (car s) (union (cdr s) (cdr t))))
+        ((> (car s) (car t)) (cons (car t) (union s (cdr t))))
+        ((< (car s) (car t)) (cons (car s) (union (cdr s) t)))
+        (else nil)
+        ))
+; expect union
+
+(union odds (list 2 3 4 5))
+; expect (2 3 4 5 7 9)
+
+((lambda (a b) (+ (* 2 a) b)) 5 6)
+; expect 16
+
+(define (flip fn) (lambda (a b) (fn b a)))
+; expect flip
+
+((flip -) 5 8)
+; expect 3
+
+(define (f x) (lambda (x) (+ x 3)))
+; define f
+
+((f 2) 2)
+; define 5
 
 
+;;; *************************
+;;; *** PROVIDED BY ADMIN ***
+;;; *************************
 
 ;;; These are examples from several sections of "The Structure
 ;;; and Interpretation of Computer Programs" by Abelson and Sussman.

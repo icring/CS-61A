@@ -98,6 +98,7 @@ class Pair:
                 return True
         return False
 
+
 class nil:
     """The empty list"""
 
@@ -177,14 +178,12 @@ def read_tail(src):
             return nil
         elif src.current() == ".":
             src.pop()
-            first = scheme_read(src)
-            rest = read_tail(src)
+            first, rest = scheme_read(src), read_tail(src)
             if rest != nil:
                 raise SyntaxError("Expected one element after .")
             return first
         else:
-            first = scheme_read(src)
-            rest = read_tail(src)
+            first, rest = scheme_read(src), read_tail(src)
             return Pair(first, rest)
     except EOFError:
         raise SyntaxError("unexpected end of file")
