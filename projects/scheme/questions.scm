@@ -94,10 +94,11 @@
         ((let? expr)
          (let ((values (cadr expr))
                (body   (cddr expr)))
-               (list (append (list 'lambda (car (zip values))) (apply-to-all analyze body)) (caadr (zip values)))
-           ))  
+              (append (list (append (list 'lambda (apply-to-all analyze (car (zip values))))
+                                                  (apply-to-all analyze body)))
+                                                  (apply-to-all analyze (cadr (zip values))))))  
         (else
-          expr
+          (apply-to-all analyze expr)
          )))
 
 (analyze 1)

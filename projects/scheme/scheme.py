@@ -439,11 +439,13 @@ def scheme_optimized_eval(expr, env):
                 return apply_primitive(procedure, args, env)
             elif isinstance(procedure, LambdaProcedure):
                 env = procedure.env.make_call_frame(procedure.formals, args)
+                expr = procedure.body
             elif isinstance(procedure, MuProcedure):
                 env = env.make_call_frame(procedure.formals, args)
+                expr = procedure.body
             else:
                 raise SchemeError("Cannot call {0}".format(str(procedure)))
-            expr = procedure.body
+            
 
 
 ################################################################
